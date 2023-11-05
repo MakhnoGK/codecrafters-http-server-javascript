@@ -61,8 +61,11 @@ const server = net.createServer((socket) => {
 
         if (headers.request.path.startsWith('/files')) {
             const [, filename] = headers.request.path.match(/\/files\/(.+)/)
+            const dirFlag = process.argv.indexOf('--directory') + 1;
+            const directory = process.argv[dirFlag];
+            const file = path.join(directory, filename);
 
-            const fd = fs.openSync(path.resolve(process.argv[3] ?? '..', filename), 'r');
+            const fd = fs.openSync(file, 'r');
 
             if (!fd) {
                 socket.write(notFoundResponse())
