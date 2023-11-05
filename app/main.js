@@ -28,7 +28,7 @@ const fileCreatedResponse = () => {
 
 
 const notFoundResponse = () => {
-    return 'HTTP/1.1 404 Not Fund\r\n\r\n'
+    return 'HTTP/1.1 404 Not Found\r\n\r\n'
 }
 
 const handlers = {
