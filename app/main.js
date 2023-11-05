@@ -1,4 +1,6 @@
 const net = require('net')
+const fs = require('fs')
+const path = require('path')
 
 class Request {
     constructor(method, path, version) {
@@ -41,11 +43,51 @@ const textResponse = (text) => {
     )
 }
 
+const fileResponse = (bytesRead, buffer) => {
+    return (
+        'HTTP/1.1 200 OK\r\n' +
+        'Content-Type: application/octet-stream\r\n' +
+        `Content-Length: ${bytesRead}\r\n\r\n${buffer}`
+    )
+}
+
+const notFoundResponse = () => {
+    return 'HTTP/1.1 404 Not Fund\r\n\r\n'
+}
+
+const readFile = (filename) => {
+    return new Promise((resolve, reject) => {
+        fs.open(path.resolve(process.argv[3] ?? '', filename), 'r', (err, fd) => {
+            if (err) {
+                reject()
+            }
+
+            fs.read(fd, (err, bytesRead, buffer) => {
+                if (err) {
+                    reject()
+                }
+
+                resolve({ length: bytesRead, buffer })
+            })
+        })
+    })
+}
+
 const server = net.createServer((socket) => {
     socket.on('data', (data) => {
         const headers = RequestHeaders.parse(data)
 
-        if (headers.request.path.startsWith('/user-agent')) {
+        if (headers.request.path.startsWith('/files')) {
+            const [, filename] = headers.request.path.match(/\/files\/(.+)/)
+
+            readFile(filename)
+                .then(({ length, buffer }) => {
+                    socket.write(fileResponse(length, buffer))
+                })
+                .catch(() => {
+                    socket.write(notFoundResponse())
+                })
+        } else if (headers.request.path.startsWith('/user-agent')) {
             socket.write(textResponse(headers.ua), 'utf-8')
         } else if (headers.request.path.startsWith('/echo')) {
             const [, text] = headers.request.path.match(/\/echo\/(.+)/)
@@ -57,7 +99,7 @@ const server = net.createServer((socket) => {
         } else if (headers.request.path === '/') {
             socket.write('HTTP/1.1 200 OK\r\n\r\n', 'utf-8')
         } else {
-            socket.write('HTTP/1.1 404 Not Fund\r\n\r\n', 'utf-8')
+            socket.write(notFoundResponse(), 'utf-8')
         }
 
         socket.end()
