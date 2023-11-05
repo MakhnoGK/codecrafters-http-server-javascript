@@ -55,24 +55,6 @@ const notFoundResponse = () => {
     return 'HTTP/1.1 404 Not Fund\r\n\r\n'
 }
 
-const readFile = (filename) => {
-    return new Promise((resolve, reject) => {
-        fs.open(path.resolve(process.argv[3] ?? '', filename), 'r', (err, fd) => {
-            if (err) {
-                reject()
-            }
-
-            fs.read(fd, (err, bytesRead, buffer) => {
-                if (err) {
-                    reject()
-                }
-
-                resolve({ length: bytesRead, buffer })
-            })
-        })
-    })
-}
-
 const server = net.createServer((socket) => {
     socket.on('data', (data) => {
         const headers = RequestHeaders.parse(data)
@@ -80,13 +62,15 @@ const server = net.createServer((socket) => {
         if (headers.request.path.startsWith('/files')) {
             const [, filename] = headers.request.path.match(/\/files\/(.+)/)
 
-            readFile(filename)
-                .then(({ length, buffer }) => {
-                    socket.write(fileResponse(length, buffer))
-                })
-                .catch(() => {
-                    socket.write(notFoundResponse())
-                })
+            const fd = fs.openSync(path.resolve(process.argv[3] ?? '..', filename), 'r');
+
+            if (!fd) {
+                socket.write(notFoundResponse())
+            }
+
+            const contents = fs.readFileSync(fd)
+
+            socket.write(fileResponse(contents.length, contents))
         } else if (headers.request.path.startsWith('/user-agent')) {
             socket.write(textResponse(headers.ua), 'utf-8')
         } else if (headers.request.path.startsWith('/echo')) {
