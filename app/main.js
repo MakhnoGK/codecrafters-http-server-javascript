@@ -26,15 +26,11 @@ const fileCreatedResponse = () => {
     )
 }
 
-
 const notFoundResponse = () => {
     return 'HTTP/1.1 404 Not Found\r\n\r\n'
 }
 
 const handlers = {
-    '/': function () {
-        this.socket.write('HTTP/1.1 200 OK\r\n\r\n', 'utf-8')
-    },
     '/echo': function () {
         const [, text] = this.headers.path.match(/\/echo\/(.+)/)
 
@@ -64,13 +60,18 @@ const handlers = {
         } catch (error) {
             this.socket.write(notFoundResponse())
         }
-    }
+    },
+    '/': function () {
+        this.socket.write('HTTP/1.1 200 OK\r\n\r\n', 'utf-8')
+    },
 }
 
 const getHandler = (path, handlers) => {
-    const [, routeName] = path.match(/^(\/[a-z-]*)?/)
+    const [, route] = path.match(/^(\/[A-z]*)?/) ?? []
 
-    return handlers[routeName]
+    if (route && handlers[route]) {
+        return handlers[route]
+    }
 }
 
 const server = net.createServer((socket) => {
