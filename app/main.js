@@ -68,7 +68,7 @@ const handlers = {
 }
 
 const getHandler = (path, handlers) => {
-    const [, routeName] = path.match(/^(\/\w*)?/)
+    const [, routeName] = path.match(/^(\/[a-z-]+)?/)
 
     return handlers[routeName]
 }
