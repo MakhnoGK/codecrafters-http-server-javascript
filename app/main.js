@@ -75,7 +75,7 @@ const getHandler = (path, handlers) => {
 
 const server = net.createServer((socket) => {
     socket.on('data', (data) => {
-        const headers = Request.parse(data)
+        const headers = Headers.parse(data)
         const handler = getHandler(headers.path, handlers)
 
         if (!handler) {
