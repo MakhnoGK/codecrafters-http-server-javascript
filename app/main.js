@@ -59,7 +59,7 @@ const fileResponse = (bytesRead, buffer) => {
 const fileCreatedResponse = () => {
 
     return (
-        'HTTP/1.1 201 Created\r\n'
+        'HTTP/1.1 201 Created\r\n\r\n'
     )
 }
 
