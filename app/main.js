@@ -67,11 +67,10 @@ const handlers = {
 }
 
 const getHandler = (path, handlers) => {
-    const [, route] = path.match(/^(\/[A-z-]*)?/) ?? []
+    const [, route] = path.split('/');
+    const handlerKey = `/${route}`;
 
-    if (route && handlers[route]) {
-        return handlers[route]
-    }
+    return handlers[handlerKey];
 }
 
 const server = net.createServer((socket) => {
