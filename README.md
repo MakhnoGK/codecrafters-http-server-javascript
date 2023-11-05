@@ -1,3 +1,6 @@
+# TODO
+* *Handle responses* automatically build and send responses.
+
 [![progress-banner](https://backend.codecrafters.io/progress/http-server/180df209-057a-422e-8964-58012e6aafab)](https://app.codecrafters.io/users/codecrafters-bot?r=2qF)
 
 This is a starting point for JavaScript solutions to the
