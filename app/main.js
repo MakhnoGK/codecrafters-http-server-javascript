@@ -56,7 +56,7 @@ class Response {
             responseString += `\r\n\r\n${this.content}`
         }
 
-        return responseString;
+        return responseString + '\r\n';
     }
 }
 
