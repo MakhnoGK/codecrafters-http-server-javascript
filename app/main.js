@@ -29,37 +29,6 @@ class RequestHeaders {
     }
 }
 
-const statusDict = {
-    200: 'OK',
-    404: 'Not Found'
-}
-
-class Response {
-    constructor(status) {
-        this.status = 200
-    }
-
-    addContent(type, content) {
-        this.contentType = type
-        this.content = content
-    }
-
-    toString() {
-        let responseString = `HTTP/1.1 ${this.status} ${statusDict[this.status]}`
-
-        if (this.content) {
-            responseString += `\r\nContent-Type: ${this.contentType}`
-            responseString += `\r\nContent-Length: ${this.content.length}`
-        }
-
-        if (this.content) {
-            responseString += `\r\n\r\n${this.content}`
-        }
-
-        return responseString + '\r\n';
-    }
-}
-
 const server = net.createServer((socket) => {
     socket.on('data', (data) => {
         const headers = RequestHeaders.parse(data)
@@ -67,18 +36,16 @@ const server = net.createServer((socket) => {
         if (headers.request.path.includes('echo')) {
             const [, , text] = headers.request.path.split('/')
 
-            const content = new Response(200)
-            content.addContent('text/plain', text)
-
-            const responseString = content.toString()
-
-            socket.write(responseString, 'utf-8')
+            socket.write(
+                'HTTP/1.1 200 OK\r\n' +
+                'Content-Type: text/plain\r\n' +
+                `Content-Length: ${text.length}\r\n\r\n${text}`,
+                'utf-8'
+            )
         } else if (headers.request.path === '/') {
-            const ok = new Response(200)
-            socket.write(ok.toString(), 'utf-8')
+            socket.write('HTTP/1.1 200 OK\r\n\r\n', 'utf-8')
         } else {
-            const notFound = new Response(404);
-            socket.write(notFound.toString(), 'utf-8')
+            socket.write('HTTP/1.1 404 Not Fund\r\n\r\n', 'utf-8')
         }
 
         socket.end()
