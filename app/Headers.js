@@ -12,7 +12,7 @@ class RequestParser {
 
     getUserAgent() {
         const uaEntry = this.parts.find((search) => search.toLowerCase().includes('user-agent:'))
-        const [, ua] = uaEntry.split(': ')
+        const [, ua] = uaEntry?.split(': ') ?? []
 
         return ua;
     }
