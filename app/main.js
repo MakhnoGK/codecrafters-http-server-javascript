@@ -3,6 +3,7 @@ const net = require('net')
 class Request {
     constructor(method, path, version) {
         this.method = method
+        /** @type {string} */
         this.path = path
         this.version = version
     }
@@ -33,8 +34,8 @@ const server = net.createServer((socket) => {
     socket.on('data', (data) => {
         const headers = RequestHeaders.parse(data)
 
-        if (headers.request.path.includes('echo')) {
-            const [, , text] = headers.request.path.split('/')
+        if (headers.request.path.startsWith('/echo')) {
+            const [, text] = headers.request.path.match(/\/echo\/(.+)/)
 
             socket.write(
                 'HTTP/1.1 200 OK\r\n' +
