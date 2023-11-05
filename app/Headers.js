@@ -11,7 +11,7 @@ class RequestParser {
     }
 
     getUserAgent() {
-        const uaEntry = this.parts.find((search) => search.toLowerCase().includes('user-agent'))
+        const uaEntry = this.parts.find((search) => search.toLowerCase().includes('user-agent:'))
         const [, ua] = uaEntry.match(/User-Agent:\s(\S+)/) ?? []
 
         return ua;
@@ -22,7 +22,7 @@ class RequestParser {
     }
 }
 
-class Request {
+class Headers {
     method
     path
     version
@@ -44,7 +44,7 @@ class Request {
         const { method, path, version } = parser.getRequestInfo()
         const data = parser.getBody()
 
-        return new Request(
+        return new Headers(
             method,
             path,
             version,
@@ -54,4 +54,4 @@ class Request {
     }
 }
 
-module.exports = Request
+module.exports = Headers

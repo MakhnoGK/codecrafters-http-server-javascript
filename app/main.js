@@ -2,7 +2,7 @@ const net = require('net')
 const fs = require('fs')
 const path = require('path')
 
-const Request = require('./Request')
+const Headers = require('./Headers')
 
 const textResponse = (text) => {
     return (
