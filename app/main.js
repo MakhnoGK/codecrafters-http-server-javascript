@@ -45,15 +45,15 @@ class Response {
     }
 
     toString() {
-        let responseString = `HTTP/1.1 ${this.status} ${statusDict[this.status]}\r\n`
+        let responseString = `HTTP/1.1 ${this.status} ${statusDict[this.status]}`
 
         if (this.content) {
-            responseString += `Content-Type: ${this.contentType}\r\n`
-            responseString += `Content-Length: ${this.content.length}\r\n`
+            responseString += `\r\nContent-Type: ${this.contentType}`
+            responseString += `\r\nContent-Length: ${this.content.length}`
         }
 
         if (this.content) {
-            responseString += `\r\n${this.content}`
+            responseString += `\r\n\r\n${this.content}`
         }
 
         return responseString;
@@ -72,7 +72,7 @@ const server = net.createServer((socket) => {
 
             const responseString = content.toString()
 
-            socket.write(content.toString(), 'utf-8')
+            socket.write(responseString, 'utf-8')
         } else if (headers.request.path === '/') {
             const ok = new Response(200)
             socket.write(ok.toString(), 'utf-8')
