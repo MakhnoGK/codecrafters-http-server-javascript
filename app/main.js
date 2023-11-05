@@ -16,31 +16,42 @@ class Request {
 }
 
 class RequestHeaders {
-    constructor(request) {
+    constructor(request, ua) {
         this.request = request
+        this.ua = ua
     }
 
     static parse(buffer) {
         const str = buffer.toString('utf-8')
         const [request] = str.split(/\r\n/)
+        const [, ua] = str.match(/User-Agent:\s(\S+)/)
 
         return new RequestHeaders(
-            Request.parse(request)
+            Request.parse(request),
+            ua
         )
     }
+}
+
+const textResponse = (text) => {
+    return (
+        'HTTP/1.1 200 OK\r\n' +
+        'Content-Type: text/plain\r\n' +
+        `Content-Length: ${text.length}\r\n\r\n${text}`
+    )
 }
 
 const server = net.createServer((socket) => {
     socket.on('data', (data) => {
         const headers = RequestHeaders.parse(data)
 
-        if (headers.request.path.startsWith('/echo')) {
+        if (headers.request.path.startsWith('/user-agent')) {
+            socket.write(textResponse(headers.ua), 'utf-8')
+        } else if (headers.request.path.startsWith('/echo')) {
             const [, text] = headers.request.path.match(/\/echo\/(.+)/)
 
             socket.write(
-                'HTTP/1.1 200 OK\r\n' +
-                'Content-Type: text/plain\r\n' +
-                `Content-Length: ${text.length}\r\n\r\n${text}`,
+                textResponse(text),
                 'utf-8'
             )
         } else if (headers.request.path === '/') {
