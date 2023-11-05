@@ -24,7 +24,7 @@ class RequestHeaders {
     static parse(buffer) {
         const str = buffer.toString('utf-8')
         const [request] = str.split(/\r\n/)
-        const [, ua] = str.match(/User-Agent:\s(\S+)/)
+        const [, ua] = str.match(/User-Agent:\s(\S+)/) ?? []
 
         return new RequestHeaders(
             Request.parse(request),
