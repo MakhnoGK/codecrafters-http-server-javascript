@@ -18,19 +18,24 @@ class Request {
 }
 
 class RequestHeaders {
-    constructor(request, ua) {
+    constructor(request, ua, data) {
         this.request = request
         this.ua = ua
+        this.data = data;
     }
 
     static parse(buffer) {
         const str = buffer.toString('utf-8')
-        const [request] = str.split(/\r\n/)
+        const parts = str.split(/\r\n/)
+        const [request] = parts;
         const [, ua] = str.match(/User-Agent:\s(\S+)/) ?? []
+
+        const data = parts[parts.length - 1];
 
         return new RequestHeaders(
             Request.parse(request),
-            ua
+            ua,
+            data
         )
     }
 }
@@ -51,6 +56,13 @@ const fileResponse = (bytesRead, buffer) => {
     )
 }
 
+const fileCreatedResponse = () => {
+
+    return (
+        'HTTP/1.1 201 Created\r\n'
+    )
+}
+
 const notFoundResponse = () => {
     return 'HTTP/1.1 404 Not Fund\r\n\r\n'
 }
@@ -66,12 +78,16 @@ const server = net.createServer((socket) => {
             const file = path.join(directory, filename);
 
             try {
-                const fd = fs.openSync(file, 'r');
-                const contents = fs.readFileSync(fd)
+                if (headers.request.method === 'GET') {
+                    const fd = fs.openSync(file, 'r');
+                    const contents = fs.readFileSync(fd)
 
-                socket.write(fileResponse(contents.length, contents))
+                    socket.write(fileResponse(contents.length, contents))
+                } else if (headers.request.method === 'POST') {
+                    fs.writeFileSync(file, headers.data)
+                    socket.write(fileCreatedResponse())
+                }
             } catch(error) {
-
                 socket.write(notFoundResponse())
             }
         } else if (headers.request.path.startsWith('/user-agent')) {
