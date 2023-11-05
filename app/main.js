@@ -65,15 +65,15 @@ const server = net.createServer((socket) => {
             const directory = process.argv[dirFlag];
             const file = path.join(directory, filename);
 
-            const fd = fs.openSync(file, 'r');
+            try {
+                const fd = fs.openSync(file, 'r');
+                const contents = fs.readFileSync(fd)
 
-            if (!fd) {
+                socket.write(fileResponse(contents.length, contents))
+            } catch(error) {
+
                 socket.write(notFoundResponse())
             }
-
-            const contents = fs.readFileSync(fd)
-
-            socket.write(fileResponse(contents.length, contents))
         } else if (headers.request.path.startsWith('/user-agent')) {
             socket.write(textResponse(headers.ua), 'utf-8')
         } else if (headers.request.path.startsWith('/echo')) {
